@@ -2,7 +2,7 @@
 
 **High refresh rate patch for classic Windows 7 games on Windows 10 and Windows 11.**
 
-Bring classic Solitaire, Spider Solitaire, FreeCell, Hearts, Minesweeper, Mahjong Titans, and Purble Place to modern high refresh rate displays. This patch replaces the original engine's fixed update timing with adaptive timing based on your monitor's detected refresh rate, without speeding up gameplay animations.
+Bring classic Solitaire, Spider Solitaire, FreeCell, Hearts, Minesweeper, Mahjong Titans, and Purble Place to modern high refresh rate displays. This patch replaces the original engine's fixed update timing with adaptive timing based on your monitor's detected refresh rate, while preserving original animation timing.
 
 Designed for the x64 Windows 7 Games for Windows 11 / Windows 10 installation. This is a patch for an existing game installation, not a replacement game collection.
 
@@ -11,7 +11,8 @@ Designed for the x64 Windows 7 Games for Windows 11 / Windows 10 installation. T
 - Automatic refresh rate detection at game startup and when the Direct3D rendering device is recreated
 - Adaptive frame timing for 60 Hz, 120 Hz, 144 Hz, 165 Hz, 240 Hz, 360 Hz, and other supported refresh rates
 - Original animation durations preserved
-- Spider Solitaire fix for the yellow selection-glow artifact when moving multiple cards
+- Corrected fireworks and other legacy particle effects by preserving their original 30 Hz physics timing
+- Fix for the yellow selection-glow artifact when moving multiple cards
 - SHA-256 verification of supported executable versions and patched output
 - Original executable backups and reversible patching
 - Support for partial installations containing only some of the classic games
@@ -28,7 +29,7 @@ Designed for the x64 Windows 7 Games for Windows 11 / Windows 10 installation. T
 | Minesweeper | Adaptive FPS |
 | Mahjong Titans | Adaptive FPS |
 | Purble Place | Adaptive FPS |
-| Chess Titans | Not patched (different game engine) |
+| Chess Titans | Not required (native refresh-rate support) |
 
 The patch targets the known Windows 7 RTM x64 executables with file version `6.1.7600.16385` (`win7_rtm.090713-1255`). Exact SHA-256 fingerprints are checked before modification. Other executable versions, including some files with the same version string, may not be compatible.
 
@@ -65,7 +66,7 @@ The default installation directory is `C:\Program Files\Microsoft Games`. For a 
 & ([scriptblock]::Create([IO.File]::ReadAllText((Join-Path $PWD 'Patch-ClassicGames.ps1')))) -GameRoot 'D:\Microsoft Games'
 ```
 
-The script verifies supported files before making changes and backs up the original executables to the `FPS_Original_Backup` directory inside your game installation. Missing games are skipped. Existing game shortcuts continue to work.
+The script verifies supported files before making changes and backs up the original executables to the `FPS_Original_Backup` directory inside your game installation. Missing games are skipped. Existing game shortcuts continue to work. If v1.0.0 is already installed, run the latest script again to update without reinstalling the games.
 
 ## Restore the original games
 
@@ -88,7 +89,7 @@ Use the same `-GameRoot` parameter if you chose a custom installation directory.
 | 240 Hz | 240 FPS | 4.17 ms |
 | 360 Hz | 360 FPS | 2.78 ms |
 
-Instead of simply speeding up a fixed animation loop, the patch adjusts both the high-resolution game timing and animation time steps. It reads the Windows display refresh rate during initialization and uses the selected Direct3D adapter's display mode when available. The original fixed-rate sprite animation durations are preserved. If a valid refresh rate cannot be determined, the target falls back to 60 Hz.
+Instead of simply speeding up a fixed animation loop, the patch adjusts both the high-resolution game timing and animation time steps. It reads the Windows display refresh rate during initialization and uses the selected Direct3D adapter's display mode when available. The original fixed-rate sprite animation durations are preserved. Legacy particle effects (including victory fireworks) retain their original 30 Hz physics updates, independently of the adaptive game timing, so their speed and trajectory stay consistent across refresh rates. If a valid refresh rate cannot be determined, the target falls back to 60 Hz.
 
 The refresh rate determines the **target update rate**, not a guarantee of measured rendering FPS. Actual frame presentation depends on graphics hardware, drivers, Windows display composition, and vertical synchronization.
 
@@ -98,8 +99,9 @@ If you change the monitor or its refresh rate while a game is open, restart the 
 
 - All seven patched games launched and closed successfully on Windows 11 with a real 120 Hz display. Their internal target rate was verified to be 120 Hz, with a frame interval of approximately 8.33 ms.
 - Dynamic timing was verified in test copies for simulated 60 Hz, 144 Hz, 240 Hz, and 360 Hz values. These tests were not physical monitor FPS benchmarks.
-- The Spider Solitaire selection-glow fix was verified during gameplay.
+- The selection-glow fix was verified during gameplay.
 - Clean original-to-patched reconstruction, SHA-256 verification, and restoration were tested for all seven games.
+- The v1.0.1 legacy particle timing correction was validated against the original 30 Hz update cadence.
 
 ## Troubleshooting
 
